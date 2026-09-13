@@ -204,14 +204,9 @@ internal static class KomputerekPatch
 [HarmonyPatch(typeof(RespawnTokensManager), "get_Milestones")]
 public static class MilestonesPatch
 {
-    private static bool Postfix(ref Dictionary<Faction, List<RespawnTokensManager.Milestone>> __result)
+    private static void Postfix(ref Dictionary<Faction, List<RespawnTokensManager.Milestone>> __result)
     {
-        __result = new Dictionary<Faction, List<RespawnTokensManager.Milestone>>
-        {
-            [Faction.FoundationStaff] = Core.config.FundacjaMilestones,
-            [Faction.FoundationEnemy] = Core.config.ChaosMilestones
-        };
-
-        return false;
+        __result[Faction.FoundationStaff] = Core.config.FundacjaMilestones;
+        __result[Faction.FoundationEnemy] = Core.config.ChaosMilestones;
     }
 }
