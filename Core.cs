@@ -44,6 +44,7 @@ public class Core : MelonMod
             File.WriteAllText(configPath, JsonSerializer.Serialize(config, jsonSerializerOptions));
         }
 
+        
 
         // Patch
         HarmonyInstance.PatchAll();
