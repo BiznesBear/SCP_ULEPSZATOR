@@ -371,7 +371,6 @@
 	<ItemGroup>
 		<Compile Include="Core.cs" />
 		<Compile Include="UlepszatorConfig.cs" />
-		<Compile Include="UlepszatorPlugin.cs" />
 		<Content Include="Directory.Build.props" />
 	</ItemGroup>
 

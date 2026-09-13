@@ -35,7 +35,7 @@ public class Core : MelonMod
         if (File.Exists(configPath))
         {
             var file = File.ReadAllText(configPath);
-            config = JsonSerializer.Deserialize<UlepszatorConfig>(file);
+            config = JsonSerializer.Deserialize<UlepszatorConfig>(file) ?? new UlepszatorConfig();
             LoggerInstance.Msg($"Config read from ({configPath}).");
         }
         else
@@ -53,31 +53,34 @@ public class Core : MelonMod
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
         base.OnSceneWasLoaded(buildIndex, sceneName);
+        LoggerInstance.Msg($"Initialized {buildIndex}, {sceneName}");
+
 
         // Special chaos & mtf classes spawn chances
+        if (buildIndex == 2) // Facility
+        {
+            if (config.MtfCapitanSpawnChance >= 0)
+                RespawnWaves.PrimaryMtfWave.CaptainsPercentage = config.MtfCapitanSpawnChance;
 
-        //if (config.MtfCapitanSpawnChance >= 0)
-        //    RespawnWaves.PrimaryMtfWave.CaptainsPercentage = config.MtfCapitanSpawnChance;
+            if (config.MtfSergantSpawnChance >= 0)
+                RespawnWaves.PrimaryMtfWave.SergeantsPercentage = config.MtfSergantSpawnChance;
 
-        //if (config.MtfSergantSpawnChance >= 0)
-        //    RespawnWaves.PrimaryMtfWave.SergeantsPercentage = config.MtfSergantSpawnChance;
+            if (config.ChaosLogicerSpawnChance >= 0)
+                RespawnWaves.PrimaryChaosWave.LogicerPercent = config.ChaosLogicerSpawnChance;
 
-        //if (config.ChaosLogicerSpawnChance >= 0)
-        //    RespawnWaves.PrimaryChaosWave.LogicerPercent = config.ChaosLogicerSpawnChance;
+            if (config.ChaosShotgunSpawnChance >= 0)
+                RespawnWaves.PrimaryChaosWave.ShotgunPercent = config.ChaosShotgunSpawnChance;
 
-        //if (config.ChaosShotgunSpawnChance >= 0)
-        //    RespawnWaves.PrimaryChaosWave.ShotgunPercent = config.ChaosShotgunSpawnChance;
+            // Respawn tokens
 
-        //// Respawn tokens
+            if (config.ChaosRespawnTokens >= 0)
+                RespawnWaves.PrimaryChaosWave.RespawnTokens = config.ChaosRespawnTokens;
 
-        //if (config.ChaosRespawnTokens >= 0)
-        //    RespawnWaves.PrimaryChaosWave.RespawnTokens = config.ChaosRespawnTokens;
-
-        //if (config.ChaosRespawnTokens >= 0)
-        //    RespawnWaves.PrimaryChaosWave.RespawnTokens = config.ChaosRespawnTokens;
+            if (config.ChaosRespawnTokens >= 0)
+                RespawnWaves.PrimaryChaosWave.RespawnTokens = config.ChaosRespawnTokens;
+        }
 
     }
-
 
 }
 
@@ -86,7 +89,7 @@ public class Core : MelonMod
 [HarmonyPatch(typeof(Scp049Role), nameof(Scp049Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
 internal static class PlagaPatch
 {
-    private static void Postfix(List<RoleTypeId> alreadySpawned, ref float __result)
+    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
         if (Core.config.PlagaSpawnChace >= 0)
         {
@@ -94,13 +97,14 @@ internal static class PlagaPatch
 
             __result = Core.config.PlagaSpawnChace;
         }
+        return false;
     }
 }
 
 [HarmonyPatch(typeof(Scp096Role), nameof(Scp096Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
 internal static class NiesmialekPatch
 {
-    private static void Postfix(List<RoleTypeId> alreadySpawned, ref float __result)
+    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
         if (Core.config.SzarekSpawnChace >= 0)
         {
@@ -108,6 +112,8 @@ internal static class NiesmialekPatch
 
             __result = Core.config.SzarekSpawnChace;
         }
+        return false;
+
     }
 
 }
@@ -115,7 +121,7 @@ internal static class NiesmialekPatch
 [HarmonyPatch(typeof(Scp939Role), nameof(Scp939Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
 internal static class JaszczurPatch
 {
-    private static void Postfix(List<RoleTypeId> alreadySpawned, ref float __result)
+    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
         if (Core.config.JaszczurSpawnChace >= 0)
         {
@@ -123,6 +129,7 @@ internal static class JaszczurPatch
 
             __result = Core.config.JaszczurSpawnChace;
         }
+        return false;
 
     }
 }
@@ -130,7 +137,7 @@ internal static class JaszczurPatch
 [HarmonyPatch(typeof(Scp106Role), nameof(Scp106Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
 internal static class DziadekPatch
 {
-    private static void Postfix(List<RoleTypeId> alreadySpawned, ref float __result)
+    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
         if (Core.config.DziadekSpawnChace >= 0)
         {
@@ -138,13 +145,15 @@ internal static class DziadekPatch
 
             __result = Core.config.DziadekSpawnChace;
         }
+        return false;
+
     }
 }
 
 [HarmonyPatch(typeof(Scp173Role), nameof(Scp173Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
 internal static class OrzeszekPatch
 {
-    private static void Postfix(List<RoleTypeId> alreadySpawned, ref float __result)
+    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
         if (Core.config.OrzechSpawnChace >= 0)
         {
@@ -152,6 +161,8 @@ internal static class OrzeszekPatch
 
             __result = Core.config.OrzechSpawnChace;
         }
+        return false;
+
 
     }
 }
@@ -159,7 +170,7 @@ internal static class OrzeszekPatch
 [HarmonyPatch(typeof(Scp079Role), nameof(Scp079Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
 internal static class KomputerekPatch
 {
-    private static void Postfix(List<RoleTypeId> alreadySpawned, ref float __result)
+    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
         if (Core.config.KomputerekSpawnChace >= 0)
         {
@@ -167,24 +178,27 @@ internal static class KomputerekPatch
 
             __result = Core.config.KomputerekSpawnChace;
         }
+        return false;
+
 
     }
 }
 #endregion
 
 
-[HarmonyPatch(typeof(RespawnTokensManager), "get_Milestones")]
-public static class MilestonesPatch
-{
-    private static void Postfix(ref Dictionary<Faction, List<Milestone>> __result)
-    {
-        MelonLogger.Msg($"Zminone milestony (Fundacja: {string.Join(", ", RespawnTokensManager.Milestones[Faction.FoundationStaff])}, Choas: {string.Join(", ", RespawnTokensManager.Milestones[Faction.FoundationEnemy])})");
+//[HarmonyPatch(typeof(RespawnTokensManager), "get_Milestones")]
+//public static class MilestonesPatch
+//{
+//    private static bool Prefix(ref Dictionary<Faction, List<Milestone>> __result)
+//    {
+//        MelonLogger.Msg($"Zminone milestony (Fundacja: {string.Join(", ", RespawnTokensManager.Milestones[Faction.FoundationStaff])}, Choas: {string.Join(", ", RespawnTokensManager.Milestones[Faction.FoundationEnemy])})");
 
-        __result = new Dictionary<Faction, List<Milestone>>
-        {
-            [Faction.FoundationStaff] = Core.config.FundacjaMilestones,
-            [Faction.FoundationEnemy] = Core.config.ChaosMilestones
-        };
+//        __result = new Dictionary<Faction, List<Milestone>>
+//        {
+//            [Faction.FoundationStaff] = Core.config.FundacjaMilestones,
+//            [Faction.FoundationEnemy] = Core.config.ChaosMilestones
+//        };
 
-    }
-}
+//        return false;
+//    }
+//}
