@@ -8,10 +8,8 @@ using PlayerRoles.PlayableScps.Scp096;
 using PlayerRoles.PlayableScps.Scp106;
 using PlayerRoles.PlayableScps.Scp173;
 using PlayerRoles.PlayableScps.Scp939;
-using Respawning;
 using System.Text.Json;
 using UnityEngine;
-using static Respawning.RespawnTokensManager;
 
 [assembly: MelonInfo(typeof(SCP_ULEPSZATOR.Core), "SCP_ULEPSZATOR", "1.0.0", "BadWaterGames", null)]
 [assembly: MelonGame("Northwood", "SCPSL")]
@@ -32,23 +30,12 @@ public class Core : MelonMod
 
 
         // Load/rebuilt config
-        if (File.Exists(configPath))
-        {
-            var file = File.ReadAllText(configPath);
-            config = JsonSerializer.Deserialize<UlepszatorConfig>(file) ?? new UlepszatorConfig();
-            LoggerInstance.Msg($"Config read from ({configPath}).");
-        }
-        else
-        {
-            LoggerInstance.Msg($"Rebuilt config at ({configPath}).");
-            File.WriteAllText(configPath, JsonSerializer.Serialize(config, jsonSerializerOptions));
-        }
-
-        
+        LoadConfig();
 
         // Patch
         HarmonyInstance.PatchAll();
     }
+
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
@@ -73,13 +60,40 @@ public class Core : MelonMod
 
             // Respawn tokens
 
-            if (config.ChaosRespawnTokens >= 0)
-                RespawnWaves.PrimaryChaosWave.RespawnTokens = config.ChaosRespawnTokens;
+            if (config.MtfRespawnTokens >= 0)
+                RespawnWaves.PrimaryMtfWave.RespawnTokens = config.MtfRespawnTokens;
 
             if (config.ChaosRespawnTokens >= 0)
                 RespawnWaves.PrimaryChaosWave.RespawnTokens = config.ChaosRespawnTokens;
         }
 
+    }
+
+    private void LoadConfig()
+    {
+        try
+        {
+            if (File.Exists(configPath))
+            {
+                var file = File.ReadAllText(configPath);
+                config = JsonSerializer.Deserialize<UlepszatorConfig>(file) ?? new UlepszatorConfig();
+                LoggerInstance.Msg($"Config read from ({configPath}).");
+            }
+            else
+            {
+                LoggerInstance.Msg($"Rebuilt config at ({configPath}).");
+                File.WriteAllText(configPath, JsonSerializer.Serialize(config, jsonSerializerOptions));
+            }
+        }
+        catch(Exception ex)
+        {
+            LoggerInstance.Msg($"Cannot load config: " + ex.Message);
+        }
+        finally
+        {
+            LoggerInstance.Msg($"Loaded config at ({configPath}).");
+        }
+        
     }
 
 }
