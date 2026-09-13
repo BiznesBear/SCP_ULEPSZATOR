@@ -8,6 +8,7 @@ using PlayerRoles.PlayableScps.Scp096;
 using PlayerRoles.PlayableScps.Scp106;
 using PlayerRoles.PlayableScps.Scp173;
 using PlayerRoles.PlayableScps.Scp939;
+using Respawning;
 using System.Text.Json;
 using UnityEngine;
 
@@ -200,19 +201,17 @@ internal static class KomputerekPatch
 #endregion
 
 
-//[HarmonyPatch(typeof(RespawnTokensManager), "get_Milestones")]
-//public static class MilestonesPatch
-//{
-//    private static bool Prefix(ref Dictionary<Faction, List<Milestone>> __result)
-//    {
-//        MelonLogger.Msg($"Zminone milestony (Fundacja: {string.Join(", ", RespawnTokensManager.Milestones[Faction.FoundationStaff])}, Choas: {string.Join(", ", RespawnTokensManager.Milestones[Faction.FoundationEnemy])})");
+[HarmonyPatch(typeof(RespawnTokensManager), "get_Milestones")]
+public static class MilestonesPatch
+{
+    private static bool Postfix(ref Dictionary<Faction, List<RespawnTokensManager.Milestone>> __result)
+    {
+        __result = new Dictionary<Faction, List<RespawnTokensManager.Milestone>>
+        {
+            [Faction.FoundationStaff] = Core.config.FundacjaMilestones,
+            [Faction.FoundationEnemy] = Core.config.ChaosMilestones
+        };
 
-//        __result = new Dictionary<Faction, List<Milestone>>
-//        {
-//            [Faction.FoundationStaff] = Core.config.FundacjaMilestones,
-//            [Faction.FoundationEnemy] = Core.config.ChaosMilestones
-//        };
-
-//        return false;
-//    }
-//}
+        return false;
+    }
+}
