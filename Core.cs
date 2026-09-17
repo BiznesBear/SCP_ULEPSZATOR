@@ -10,7 +10,6 @@ using PlayerRoles.PlayableScps.Scp173;
 using PlayerRoles.PlayableScps.Scp939;
 using Respawning;
 using System.Text.Json;
-using UnityEngine;
 
 [assembly: MelonInfo(typeof(SCP_ULEPSZATOR.Core), "SCP_ULEPSZATOR", "1.0.0", "BadWaterGames", null)]
 [assembly: MelonGame("Northwood", "SCPSL")]
@@ -19,33 +18,40 @@ namespace SCP_ULEPSZATOR;
 
 public class Core : MelonMod
 {
-    private static readonly string configPath = Application.persistentDataPath + "/ulepszator-config.json";
+    private string ConfigPath { get; set; }
+
+
 
     private static readonly JsonSerializerOptions jsonSerializerOptions = new() { WriteIndented = true };
+
+    private const int FacilityScene = 2; 
 
     internal static UlepszatorConfig config = new();
 
     public override void OnInitializeMelon()
     {
-        LoggerInstance.Msg($"Initialized SCP ULEPSZATOR at ({DateTime.Now:T}).");
+        LoggerInstance.Msg($"Initialized SCP ULEPSZATOR at {MelonAssembly.Location}.");
 
-
+        ConfigPath = Path.GetDirectoryName(MelonAssembly.Location) + "\\ulepszator-config.json";
+        LoggerInstance.Msg($"Config location is set to: {ConfigPath}.");
+        
         // Load/rebuilt config
         LoadConfig();
 
         // Patch
         HarmonyInstance.PatchAll();
+        
     }
 
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
         base.OnSceneWasLoaded(buildIndex, sceneName);
-        LoggerInstance.Msg($"Initialized {buildIndex}, {sceneName}");
+        LoggerInstance.Msg($"Loaded scene: (index: {buildIndex}; name: {sceneName})");
 
 
         // Special chaos & mtf classes spawn chances
-        if (buildIndex == 2) // Facility
+        if (buildIndex == FacilityScene) // Facility
         {
             if (config.MtfCapitanSpawnChance >= 0)
                 RespawnWaves.PrimaryMtfWave.CaptainsPercentage = config.MtfCapitanSpawnChance;
@@ -59,31 +65,42 @@ public class Core : MelonMod
             if (config.ChaosShotgunSpawnChance >= 0)
                 RespawnWaves.PrimaryChaosWave.ShotgunPercent = config.ChaosShotgunSpawnChance;
 
-            // Respawn tokens
 
-            if (config.MtfRespawnTokens >= 0)
-                RespawnWaves.PrimaryMtfWave.RespawnTokens = config.MtfRespawnTokens;
+            if(config.MiniWaveSpecjalist)
+            {
+                RespawnWaves.MiniMtfWave.DefaultRole = RoleTypeId.NtfSpecialist;
+                RespawnWaves.MiniChaosWave.DefaultRole = RoleTypeId.ChaosMarauder;
+            }
 
-            if (config.ChaosRespawnTokens >= 0)
-                RespawnWaves.PrimaryChaosWave.RespawnTokens = config.ChaosRespawnTokens;
+
+            LabApi.Events.Handlers.ServerEvents.AchievedMilestone += ServerEvents_AchievedMilestone;
         }
 
     }
+
+    private void ServerEvents_AchievedMilestone(LabApi.Events.Arguments.ServerEvents.AchievedMilestoneEventArgs ev)
+    {
+        LoggerInstance.Msg(
+            $"{ev.Faction} faction reached {ev.MilestoneIndex} milestone ({ev.Threshold} - threshold) from [{string.Join(",", RespawnTokensManager.Milestones[ev.Faction].Select(m => m.Threshold))}]. \n" +
+            $"Now chaos now has {RespawnWaves.PrimaryChaosWave.RespawnTokens} tokens, {RespawnWaves.PrimaryChaosWave.Influence} influence & fundation now has {RespawnWaves.PrimaryMtfWave.RespawnTokens} tokens, {RespawnWaves.PrimaryMtfWave.Influence} influence");
+    }
+
+
 
     private void LoadConfig()
     {
         try
         {
-            if (File.Exists(configPath))
+            if (File.Exists(ConfigPath))
             {
-                var file = File.ReadAllText(configPath);
+                var file = File.ReadAllText(ConfigPath);
                 config = JsonSerializer.Deserialize<UlepszatorConfig>(file) ?? new UlepszatorConfig();
-                LoggerInstance.Msg($"Config read from ({configPath}).");
+                LoggerInstance.Msg($"Config read from: ({ConfigPath}).");
             }
             else
             {
-                LoggerInstance.Msg($"Rebuilt config at ({configPath}).");
-                File.WriteAllText(configPath, JsonSerializer.Serialize(config, jsonSerializerOptions));
+                LoggerInstance.Msg($"Rebuilt config at location: ({ConfigPath}).");
+                File.WriteAllText(ConfigPath, JsonSerializer.Serialize(config, jsonSerializerOptions));
             }
         }
         catch(Exception ex)
@@ -92,7 +109,7 @@ public class Core : MelonMod
         }
         finally
         {
-            LoggerInstance.Msg($"Loaded config at ({configPath}).");
+            LoggerInstance.Msg($"Config successfuly loaded from: ({ConfigPath}).");
         }
         
     }
@@ -112,6 +129,7 @@ internal static class PlagaPatch
 
             __result = Core.config.PlagaSpawnChace;
         }
+
         return false;
     }
 }
@@ -178,7 +196,6 @@ internal static class OrzeszekPatch
         }
         return false;
 
-
     }
 }
 
@@ -189,24 +206,24 @@ internal static class KomputerekPatch
     {
         if (Core.config.KomputerekSpawnChace >= 0)
         {
-            MelonLogger.Msg("Walić orzeszka (ciebie akurat niecierpie)");
+            MelonLogger.Msg("Walić komputerka (ciebie nawet nie znam xd)");
 
             __result = Core.config.KomputerekSpawnChace;
         }
         return false;
-
 
     }
 }
 #endregion
 
 
-[HarmonyPatch(typeof(RespawnTokensManager), "get_Milestones")]
+[HarmonyPatch(typeof(RespawnTokensManager), nameof(RespawnTokensManager.Milestones), MethodType.Getter)]
 public static class MilestonesPatch
 {
+    // TODO: Naprawić UI, jeżeli możliwe
     private static void Postfix(ref Dictionary<Faction, List<RespawnTokensManager.Milestone>> __result)
     {
-        __result[Faction.FoundationStaff] = Core.config.FundacjaMilestones;
-        __result[Faction.FoundationEnemy] = Core.config.ChaosMilestones;
+        __result[Faction.FoundationStaff] = Core.config.GetMilestones(Core.config.FundacjaTokeny);
+        __result[Faction.FoundationEnemy] = Core.config.GetMilestones(Core.config.ChaosTokeny);
     }
 }

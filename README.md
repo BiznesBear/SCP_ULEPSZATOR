@@ -2,8 +2,8 @@
 Najlepszy mod na gry do 10 osób w SCP SL bo mozna wylaczyc plage hahaha
 
 # Budowa
-Zkombiluj za pomocą dotneta 6.0.
-Ewentualnie zkorzyztaj z dostarczonego przezemnie pliku ktury NA PEWNO DZIAŁA.
+Zkombiluj za pomocą dotneta 6.0. Musisz mieć zainstalowanego melon ładowacz (patrz instalacja) aby móc w projekcie dodać zależności serwera łescepe lab.
+Ewentualnie zkorzyztaj z dostarczonego przezemnie pliku ktury NA PEWNO DZIAŁA do bezpośredniej instsalacji poniżej.
 
 # Instalacja
 1. Zainstaluj Melon mod loader zstond: https://github.com/lavagang/melonloader
@@ -36,10 +36,8 @@ Generalnie to wygloda tak:
   "MtfSergantSpawnChance": 0.300000012,
   "ChaosLogicerSpawnChance": 0.200000003,
   "ChaosShotgunSpawnChance": 0.300000012,
-  "MtfRespawnTokens": -1,
-  "ChaosRespawnTokens": -1
 }
 ```
 
-Jak dasz ziomek na coś minus jeden to bedom uzywane defultowe ustawienia SCP:SL.
+Jak dasz ziomek na coś minus jeden to bedom uzywane defultowe ustawienia Scp sekretny laboratorium.
 
