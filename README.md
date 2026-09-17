@@ -32,10 +32,11 @@ Generalnie to wygloda tak:
     30,
     40
   ],
-  "MtfCapitanSpawnChance": 0.200000003,
-  "MtfSergantSpawnChance": 0.300000012,
-  "ChaosLogicerSpawnChance": 0.200000003,
-  "ChaosShotgunSpawnChance": 0.300000012,
+  "MtfCapitanSpawnChance": 0.25,
+  "MtfSergantSpawnChance": 0.4,
+  "ChaosLogicerSpawnChance": 0.25,
+  "ChaosShotgunSpawnChance": 0.4,
+  "MiniWaveSpecjalist": true
 }
 ```
 
