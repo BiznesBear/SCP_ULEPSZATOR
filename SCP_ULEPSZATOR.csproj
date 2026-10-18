@@ -370,6 +370,9 @@
 
 	<ItemGroup>
 		<Compile Include="Core.cs" />
+		<Compile Include="Helpers.cs" />
+		<Compile Include="Patches.cs" />
+		<Compile Include="UlepszatorPlugin.cs" />
 		<Compile Include="UlepszatorConfig.cs" />
 		<Content Include="Directory.Build.props" />
 	</ItemGroup>

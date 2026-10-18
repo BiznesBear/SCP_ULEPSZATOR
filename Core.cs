@@ -1,15 +1,16 @@
-﻿using HarmonyLib;
+﻿using LabApi.Events.Handlers;
 using LabApi.Features.Wrappers;
+using MapGeneration;
+using MEC;
 using MelonLoader;
+using MelonLoader.TinyJSON;
 using PlayerRoles;
-using PlayerRoles.PlayableScps.Scp049;
-using PlayerRoles.PlayableScps.Scp079;
-using PlayerRoles.PlayableScps.Scp096;
-using PlayerRoles.PlayableScps.Scp106;
-using PlayerRoles.PlayableScps.Scp173;
-using PlayerRoles.PlayableScps.Scp939;
 using Respawning;
+using Steamworks;
 using System.Text.Json;
+using UnityEngine;
+
+
 
 [assembly: MelonInfo(typeof(SCP_ULEPSZATOR.Core), "SCP_ULEPSZATOR", "1.0.0", "BadWaterGames", null)]
 [assembly: MelonGame("Northwood", "SCPSL")]
@@ -18,212 +19,225 @@ namespace SCP_ULEPSZATOR;
 
 public class Core : MelonMod
 {
-    private string ConfigPath { get; set; }
+    public static Core Instance { get; private set; }
+    public string ConfigPath { get; private set; }
+    public  UlepszatorConfig Config { get; private set; } = new();
+    public bool LoadedPlugin { get; private set; }
 
+    public static readonly JsonSerializerOptions jsonSerializerOptions = new() { 
+        WriteIndented = true,
+        Converters = { new JsonConverterFloat() }  
+    };
+    
+    private const int FacilitySceneIndex = 2; 
+    private UlepszatorPlugin ulepszatorPlugin;
 
-
-    private static readonly JsonSerializerOptions jsonSerializerOptions = new() { WriteIndented = true };
-
-    private const int FacilityScene = 2; 
-
-    internal static UlepszatorConfig config = new();
+    public const string WarheadDetonationMessage = "Generator over load .G2 .G3 .G7 .G6 .G5 .G5 ALL GENERATORS .G5 .G3 .G6 .G6 .G6 warhead activated and .G3 .G6 .G5 locked .G6 .G5 .G2 ALL PERSON CAN DETONATION .G3 .G3";
 
     public override void OnInitializeMelon()
     {
-        LoggerInstance.Msg($"Initialized SCP ULEPSZATOR at {MelonAssembly.Location}.");
+        Instance = this;
+        LogAll($"Initialized SCP ULEPSZATOR at {MelonAssembly.Location}.");
 
-        ConfigPath = Path.GetDirectoryName(MelonAssembly.Location) + "\\ulepszator-config.json";
-        LoggerInstance.Msg($"Config location is set to: {ConfigPath}.");
+        ConfigPath = Path.GetDirectoryName(MelonAssembly.Location) + "\\ulepszator-Config.json";
+        LogAll($"Config location is set to: {ConfigPath}.");
         
-        // Load/rebuilt config
+        // Load/rebuilt Config
         LoadConfig();
 
+        
         // Patch
         HarmonyInstance.PatchAll();
-        
+
+        ulepszatorPlugin = new();        
     }
 
+    
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
         base.OnSceneWasLoaded(buildIndex, sceneName);
-        LoggerInstance.Msg($"Loaded scene: (index: {buildIndex}; name: {sceneName})");
+        LogAll($"Loaded scene: (index: {buildIndex}; name: {sceneName})");
 
+
+        if (!LoadedPlugin)
+        { 
+            ulepszatorPlugin.Enable(); 
+            LoadedPlugin = true;
+        } 
+        
 
         // Special chaos & mtf classes spawn chances
-        if (buildIndex == FacilityScene) // Facility
+        if (buildIndex == FacilitySceneIndex) // Facility
         {
-            if (config.MtfCapitanSpawnChance >= 0)
-                RespawnWaves.PrimaryMtfWave.CaptainsPercentage = config.MtfCapitanSpawnChance;
+            if (Config.MtfCapitanSpawnChance >= 0)
+                RespawnWaves.PrimaryMtfWave.CaptainsPercentage = Config.MtfCapitanSpawnChance;
 
-            if (config.MtfSergantSpawnChance >= 0)
-                RespawnWaves.PrimaryMtfWave.SergeantsPercentage = config.MtfSergantSpawnChance;
+            if (Config.MtfSergantSpawnChance >= 0)
+                RespawnWaves.PrimaryMtfWave.SergeantsPercentage = Config.MtfSergantSpawnChance;
 
-            if (config.ChaosLogicerSpawnChance >= 0)
-                RespawnWaves.PrimaryChaosWave.LogicerPercent = config.ChaosLogicerSpawnChance;
+            if (Config.ChaosLogicerSpawnChance >= 0)
+                RespawnWaves.PrimaryChaosWave.LogicerPercent = Config.ChaosLogicerSpawnChance;
 
-            if (config.ChaosShotgunSpawnChance >= 0)
-                RespawnWaves.PrimaryChaosWave.ShotgunPercent = config.ChaosShotgunSpawnChance;
+            if (Config.ChaosShotgunSpawnChance >= 0)
+                RespawnWaves.PrimaryChaosWave.ShotgunPercent = Config.ChaosShotgunSpawnChance;
 
 
-            if(config.MiniWaveSpecjalist)
+            if(Config.MiniWaveSpecjalist)
             {
                 RespawnWaves.MiniMtfWave.DefaultRole = RoleTypeId.NtfSpecialist;
                 RespawnWaves.MiniChaosWave.DefaultRole = RoleTypeId.ChaosMarauder;
             }
 
+            
+            PlayerEvents.Kicking += (e) =>
+            {
+                LogAll($"Server is kicking: {e.Player.DisplayName} for {e.Reason}; Issuer: {e.Issuer.DisplayName}; ");
+            };
 
-            LabApi.Events.Handlers.ServerEvents.AchievedMilestone += ServerEvents_AchievedMilestone;
+                
+            PlayerEvents.Spawned += (e) =>
+            {
+                Timing.CallDelayed(2, () => e?.Player?.Scale = Vector3.one);                
+            };
+
+            // TODO: 
+            PlayerEvents.FlippedCoin += (e) => 
+            {
+                if (!Config.CoinFlipCustomMechanic)
+                    return;
+
+
+                Vector3 targetSize = e.Player.Scale;
+                
+                
+                if(e.IsTails || e.Player.MaxHealth < 100)
+                {
+                    targetSize = targetSize.ModifyVector3(v => v * Config.KrasnalScaleFactor);
+
+                    if (e.Player.MaxHealth - Config.KrasnalHealthRemove < 100 - Config.KrasnalHealthRemove * Config.MaxFlips)
+                    {
+                        LogAll($"{e.Player.DisplayName} jest juz wystarczajoco krasnalem");
+                        return;
+                    }
+
+                   
+                    e.Player.MaxHealth -= Config.KrasnalHealthRemove;
+
+
+                    if (e.Player.MaxHealth <= 0)
+                        e.Player.Kill("Coś ty najlepszego odjaniepawlił", $"{e.Player.DisplayName} fliped a coin one");
+
+                    e.Player.GiveRandomCandy();
+                    e.Player.Emotion = PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers.EmotionPresetType.Ogre;
+                }
+                else if(e.Player.MaxHealth > 99)
+                {
+                    targetSize = targetSize.ModifyVector3(v => v * Config.GigantScaleFactor);
+
+                    if (e.Player.MaxHealth + Config.GigantHealthAdd > 100 + Config.GigantHealthAdd * Config.MaxFlips)
+                    {
+                        LogAll($"{e.Player.DisplayName} jest juz wystarczajoco gigantem");
+                        return;
+                    }
+
+
+                    e.Player.MaxHealth += Config.GigantHealthAdd;
+                    e.Player.Emotion = PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers.EmotionPresetType.AwkwardSmile;
+                }
+                // TODO: Dodać kary
+
+
+                e.Player.Scale = targetSize;
+            };
+
+            ServerEvents.AchievedMilestone += (ev) =>
+            {
+                LogAll(
+                   $"{ev.Faction} faction reached {ev.MilestoneIndex} milestone ({ev.Threshold} - threshold) from [{string.Join(",", RespawnTokensManager.Milestones[ev.Faction].Select(m => m.Threshold))}]. \n" +
+                   $"Now chaos now has {RespawnWaves.PrimaryChaosWave.RespawnTokens} tokens, {RespawnWaves.PrimaryChaosWave.Influence} influence & fundation now has {RespawnWaves.PrimaryMtfWave.RespawnTokens} tokens, {RespawnWaves.PrimaryMtfWave.Influence} influence");
+            };
+
+            
+            if(Config.GeneratorActivationWarheadMechanic)
+                ObjectiveEvents.ActivatedGeneratorCompleted += (e) => {
+
+                
+
+                    int count = Generator.List.Count(g => g.Engaged);
+                    Warhead.DetonationTime /= count;
+               
+                    LogAll("Warhead detonation time: " + Warhead.DetonationTime);
+
+                    if(count > 2)
+                    {
+                        Warhead.LeverStatus = true;
+                        Warhead.IsLocked = true;
+
+                        Announcer.Clear();
+                        Announcer.GlitchyMessage(Core.WarheadDetonationMessage, 0.3f, 0.4f);
+
+                    }
+                };
+
+            PlayerEvents.UnlockingWarheadButton += (e) =>
+            {
+                e.IsAllowed = (Generator.List.Count(g => g.Engaged) > 2 && Config.GeneratorActivationWarheadMechanic) || (Config.WarheadButtonPermissions > 0 && e.Player.CurrentItem.Category == ItemCategory.Keycard && ((KeycardItem) e.Player.CurrentItem).Permissions == Config.WarheadButtonPermissions);
+                if(e.IsAllowed)
+                {
+                    Announcer.Clear();
+                    Announcer.GlitchyMessage("WARHEAD .G3 READY TO DESTRUCT DETONATION", 0.3f, 0.4f);
+                }
+            };
+
         }
 
     }
 
-    private void ServerEvents_AchievedMilestone(LabApi.Events.Arguments.ServerEvents.AchievedMilestoneEventArgs ev)
-    {
-        LoggerInstance.Msg(
-            $"{ev.Faction} faction reached {ev.MilestoneIndex} milestone ({ev.Threshold} - threshold) from [{string.Join(",", RespawnTokensManager.Milestones[ev.Faction].Select(m => m.Threshold))}]. \n" +
-            $"Now chaos now has {RespawnWaves.PrimaryChaosWave.RespawnTokens} tokens, {RespawnWaves.PrimaryChaosWave.Influence} influence & fundation now has {RespawnWaves.PrimaryMtfWave.RespawnTokens} tokens, {RespawnWaves.PrimaryMtfWave.Influence} influence");
-    }
 
-
-
-    private void LoadConfig()
+    public void LoadConfig()
     {
         try
         {
             if (File.Exists(ConfigPath))
             {
                 var file = File.ReadAllText(ConfigPath);
-                config = JsonSerializer.Deserialize<UlepszatorConfig>(file) ?? new UlepszatorConfig();
-                LoggerInstance.Msg($"Config read from: ({ConfigPath}).");
+                Config = JsonSerializer.Deserialize<UlepszatorConfig>(file) ?? new UlepszatorConfig();
+                LogAll($"Config read from: ({ConfigPath}).");
             }
             else
             {
-                LoggerInstance.Msg($"Rebuilt config at location: ({ConfigPath}).");
-                File.WriteAllText(ConfigPath, JsonSerializer.Serialize(config, jsonSerializerOptions));
+                RebuiltConfig();
             }
         }
         catch(Exception ex)
         {
-            LoggerInstance.Msg($"Cannot load config: " + ex.Message);
+            LogAll($"Cannot load Config: " + ex.Message);
         }
         finally
         {
-            LoggerInstance.Msg($"Config successfuly loaded from: ({ConfigPath}).");
+            LogAll($"Config successfuly loaded from: ({ConfigPath}).");
         }
         
     }
 
-}
-
-#region ScpPatches
-
-[HarmonyPatch(typeof(Scp049Role), nameof(Scp049Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class PlagaPatch
-{
-    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
+    public void RebuiltConfig()
     {
-        if (Core.config.PlagaSpawnChace >= 0)
-        {
-            MelonLogger.Msg("Walić plage (choc i tak cie kocham slodziaku)");
-
-            __result = Core.config.PlagaSpawnChace;
-        }
-
-        return false;
+        LogAll($"Rebuilt Config at location: ({ConfigPath}).");
+        File.WriteAllText(ConfigPath, JsonSerializer.Serialize(Config, jsonSerializerOptions));
     }
-}
 
-[HarmonyPatch(typeof(Scp096Role), nameof(Scp096Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class NiesmialekPatch
-{
-    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
+    public void ResetConfig() => Config = new();
+
+
+    /// <summary>
+    /// Logs to melon loader and to server console
+    /// </summary>
+    internal void LogAll(string text)
     {
-        if (Core.config.SzarekSpawnChace >= 0)
-        {
-            MelonLogger.Msg("Dewaj mi tego szarka kuzwa (4 fucking pixels guy)");
-
-            __result = Core.config.SzarekSpawnChace;
-        }
-        return false;
-
+        LoggerInstance.Msg(text);
+        ServerConsole.AddLog(text, System.ConsoleColor.Magenta);
     }
 
 }
 
-[HarmonyPatch(typeof(Scp939Role), nameof(Scp939Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class JaszczurPatch
-{
-    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
-    {
-        if (Core.config.JaszczurSpawnChace >= 0)
-        {
-            MelonLogger.Msg("Walić jaszczur (choc i tak cie kocham slodziaku)");
-
-            __result = Core.config.JaszczurSpawnChace;
-        }
-        return false;
-
-    }
-}
-
-[HarmonyPatch(typeof(Scp106Role), nameof(Scp106Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class DziadekPatch
-{
-    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
-    {
-        if (Core.config.DziadekSpawnChace >= 0)
-        {
-            MelonLogger.Msg("Walić dziadka (ciebie akurat niecierpie)");
-
-            __result = Core.config.DziadekSpawnChace;
-        }
-        return false;
-
-    }
-}
-
-[HarmonyPatch(typeof(Scp173Role), nameof(Scp173Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class OrzeszekPatch
-{
-    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
-    {
-        if (Core.config.OrzechSpawnChace >= 0)
-        {
-            MelonLogger.Msg("Walić orzeszka (ciebie akurat niecierpie)");
-
-            __result = Core.config.OrzechSpawnChace;
-        }
-        return false;
-
-    }
-}
-
-[HarmonyPatch(typeof(Scp079Role), nameof(Scp079Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class KomputerekPatch
-{
-    private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
-    {
-        if (Core.config.KomputerekSpawnChace >= 0)
-        {
-            MelonLogger.Msg("Walić komputerka (ciebie nawet nie znam xd)");
-
-            __result = Core.config.KomputerekSpawnChace;
-        }
-        return false;
-
-    }
-}
-#endregion
-
-
-[HarmonyPatch(typeof(RespawnTokensManager), nameof(RespawnTokensManager.Milestones), MethodType.Getter)]
-public static class MilestonesPatch
-{
-    // TODO: Naprawić UI, jeżeli możliwe
-    private static void Postfix(ref Dictionary<Faction, List<RespawnTokensManager.Milestone>> __result)
-    {
-        __result[Faction.FoundationStaff] = Core.config.GetMilestones(Core.config.FundacjaTokeny);
-        __result[Faction.FoundationEnemy] = Core.config.GetMilestones(Core.config.ChaosTokeny);
-    }
-}
