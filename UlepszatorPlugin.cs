@@ -55,7 +55,7 @@ public class UlepszatorPlugin : Plugin
                 return true;
             }
 
-            switch (args[0])
+            switch (args[0].ToLower())
             {
                 case "reload":
                     Core.Instance.LoadConfig();
@@ -114,15 +114,40 @@ public class UlepszatorPlugin : Plugin
                 case "settings":
                     response = $"Current SCP_ULEPSZATOR settings: \n {JsonSerializer.Serialize(Core.Instance.Config, Core.jsonSerializerOptions)}";
                     return true;
+                case "lightsout":
+                    if(args.Count >1)
+                    {
+                        switch (args[1].ToLower())
+                        {
+                            case "on":
+                                Core.Instance.Config.LightsOutMode = true;
+                                Core.Instance.LightsOutMode(true);
+                                response = "Light out mode is now enabled for this round";
+                                return true;
+                            case "off":
+                                Core.Instance.Config.LightsOutMode = false;
+                                Core.Instance.LightsOutMode(false);
+                                response = "Light out mode is now disabled for this round";
+                                return true;
+                            default:
+                                response = $"{args[1]} is invalid argument. Aviable options: on, off";
+                                return false;
+                        }
+                    }
+                    response = "Invalid args";
+                    return false;
+                case "path":
+                    response = "Config should be located at: " + Core.Instance.ConfigPath;
+                    return true;
                 case "test":
                     if(args.Count > 1)
                     {
-                        switch(args[1])
+                        switch(args[1].ToLower())
                         {
                             case "engage":
                                 if(args.Count > 2)
                                 {
-                                    switch(args[2])
+                                    switch(args[2].ToLower())
                                     {
                                         case "1":
                                             Generator.List.ElementAt(0).Engaged = true;
@@ -148,21 +173,21 @@ public class UlepszatorPlugin : Plugin
                                 }
                                 response = "No specified generator/s";
                                 return false;
-                            case "fastGenerators":
+                            case "fastgenerators":
                                 foreach (var g in Generator.List)
                                 {
                                     g.TotalActivationTime = 5;
                                 }
                                 response = "Generators are now creazy fast";
                                 return true;
-                            case "warheadMessage":
+                            case "warheadmessage":
                                 Announcer.Clear();
                                 Announcer.GlitchyMessage(Core.WarheadDetonationMessage, 0.3f, 0.4f);
 
-                                response = "message test";
+                                response = "Voiceline played";
                                 return Announcer.IsValid(Core.WarheadDetonationMessage);
                             default:
-                                response = "Invalid argument: " + args[1];
+                                response = "Invalid argument: " + args[1].ToLower() ;
                                 return false;
                         }
                     }
@@ -171,8 +196,8 @@ public class UlepszatorPlugin : Plugin
                     return false;
             }
 
-            response = "invalid ulepszator args";
-            return true;
+            response = "Invalid ulepszator args";
+            return false;
         }
     }
 }

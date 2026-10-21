@@ -1,11 +1,14 @@
-﻿using static Respawning.RespawnTokensManager;
-using Interactables.Interobjects.DoorUtils;
+﻿using Interactables.Interobjects.DoorUtils;
+using System.Drawing;
 namespace SCP_ULEPSZATOR;
 
 
 public class UlepszatorConfig
 {
+    // -----
     // SCP Spawn chances
+    // -----
+
     public float PlagaSpawnChace { get; set; } = 1f;
     public float OrzechSpawnChace { get; set; } = 1f;
     public float JaszczurSpawnChace { get; set; } = 1f;
@@ -15,12 +18,17 @@ public class UlepszatorConfig
     public float SzkieletorSpawnChace { get; set; } = -1f;
 
 
+    // -----
     // Influence milestones
+    // -----
     public int[] FundacjaTokeny { get; set; } = [10, 20, 30, 40];
     public int[] ChaosTokeny { get; set; } = [10, 20, 30, 40];
-    
-    
+
+
+
+    // -----
     // MTF and Chaos special roles spawn chances
+    // -----
     public float MtfCapitanSpawnChance { get; set; } = 0.2f;
     public float MtfSergantSpawnChance { get; set; } = 0.3f;
 
@@ -30,6 +38,9 @@ public class UlepszatorConfig
     public bool MiniWaveSpecjalist { get; set; } = true;
 
 
+    // -----
+    // Coin flip
+    // -----
     public bool CoinFlipCustomMechanic { get; set; } = true;
     public float KrasnalScaleFactor { get; set; } = 0.7f;
     public float KrasnalHealthRemove { get; set; } = 30;
@@ -38,16 +49,32 @@ public class UlepszatorConfig
     public int MaxFlips { get; set; } = 2;
 
 
+
+    // -----
+    // Warhead
+    // -----
     public DoorPermissionFlags WarheadButtonPermissions { get; set; } = DoorPermissionFlags.ContainmentLevelOne; // 0 - defalut; ALL: 65535. NORMAL: 64. JANITOR: 16
     public bool GeneratorActivationWarheadMechanic { get; set; } = true;
 
 
-    public List<Milestone> GetMilestones(int[] numbers)
-    {
-        var lista = new List<Milestone>();
-        foreach (var token in numbers)
-            lista.Add(new(token));
-        return lista;
-    } 
+    // -----
+    // Custom modes
+    // -----
+    public bool LightsOutMode { get; set; } = false;
+    public int GeneratorElectricityPower { get; set; } = 90;
+    public int CustomModesApplyDelay { get; set; } = 30;
+
+
+    public bool CustomColorsIsLightsOutOnly { get; set; } = true;
+    public bool RandomRoomColors { get; set; } = false;
+    public List<RGB> CustomRoomColors { get; set; } = [
+        RGB.FromColor(UnityEngine.Color.magenta),
+        RGB.FromColor(UnityEngine.Color.blue),
+        RGB.FromColor(UnityEngine.Color.green),
+        RGB.FromColor(UnityEngine.Color.red),
+        RGB.FromColor(UnityEngine.Color.yellow),
+        RGB.FromColor(UnityEngine.Color.cyan),
+        RGB.FromColor(UnityEngine.Color.white),
+    ];
 
 }

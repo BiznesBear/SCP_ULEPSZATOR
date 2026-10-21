@@ -5,10 +5,9 @@ using PlayerRoles.PlayableScps.Scp096;
 using PlayerRoles.PlayableScps.Scp106;
 using PlayerRoles.PlayableScps.Scp173;
 using PlayerRoles.PlayableScps.Scp939;
+using PlayerRoles.PlayableScps.Scp3114;
 using Respawning;
 using HarmonyLib;
-using PlayerRoles.PlayableScps.Scp3114;
-using PlayerRoles.PlayableScps.Scp1507;
 
 namespace SCP_ULEPSZATOR;
 
@@ -147,24 +146,21 @@ internal static class SzkieletorPatch
         else Core.Instance.LogAll("Niewalimy szelkietorka");
 
         return true;
-
+        
     }
-
-
-
 }
-
 
 #endregion
 
 
 [HarmonyPatch(typeof(RespawnTokensManager), nameof(RespawnTokensManager.Milestones), MethodType.Getter)]
-public static class MilestonesPatch
+internal static class MilestonesPatch
 {
     // TODO: Naprawić UI, jeżeli możliwe - 10.10.2026: pierdole to
     private static void Postfix(ref Dictionary<Faction, List<RespawnTokensManager.Milestone>> __result)
     {
-        __result[Faction.FoundationStaff] = Core.Instance.Config.GetMilestones(Core.Instance.Config.FundacjaTokeny);
-        __result[Faction.FoundationEnemy] = Core.Instance.Config.GetMilestones(Core.Instance.Config.ChaosTokeny);
+        __result[Faction.FoundationStaff] = Core.Instance.Config.FundacjaTokeny.GetMilestones();
+        __result[Faction.FoundationEnemy] = Core.Instance.Config.ChaosTokeny.GetMilestones();
     }
+    
 }

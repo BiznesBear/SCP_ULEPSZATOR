@@ -17,7 +17,7 @@ Ewentualnie zkorzyztaj z dostarczonego przezemnie pliku ktury NA PEWNO DZIAŁA d
 3. zezwala na zmiane szczescia spawnu specjalnych rul jednostek operacyjnych
 4. dodaje nowom mechanike giganta i karla przy zucie monetom
 5. ma fajnom custom comende `ulepszator` 
-
+6. Zmiana koloru świateł w placówce
 
 # Congif
 Generalnie to wygloda tak:
@@ -70,3 +70,13 @@ Jak dasz ziomek na coś minus jeden to bedom uzywane defultowe ustawienia Scp se
     - `engage [1/2/3/all]` - aktuwuje generatory
     - `fastGenerators` - generatory aktuwujom sie w 5 sekund
     - `warheadMessage` - sprawia ze cassie sie zesra i powie cos ciekawego
+7. `lightsOut [on/off]` - włącza/wyłącza tryb lightout podczas istnienia serwera
+
+
+# Przyszłe rzeczy które som zaplanowane, ale nie dokońca wiadomo czy będą
+- Customowe role tj. 
+    - Sprzątacz (wysadza placówkę sprzątając tym samym ten cały syf), 
+    - Impostor (zbuntowana zbuntowana klasa D, czyli taka która toi po stronie placówki), 
+    - Technik (może robić ciekawe rzeczy z kartami i permisjami do drzwi), 
+    - Posiadacz jąder - zrespawnowany maczetą dostaje 2 odibjające się kulki
+- Poprawne wyświetlanie influenca w grze, bo by się przydało
