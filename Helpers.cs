@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using LabApi.Features.Wrappers;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using UnityEngine;
@@ -13,12 +14,22 @@ public static class Helpers
         return new Vector3(fun.Invoke(vector.x), fun.Invoke(vector.y), fun.Invoke(vector.z));
     }
 
+
     public static List<Milestone> GetMilestones(this int[] numbers)
     {
         var lista = new List<Milestone>();
         foreach (var token in numbers)
             lista.Add(new(token));
         return lista;
+    }
+
+    public static void GivePlayerIfNeeded(this Player p, ItemType type)
+    {
+        if (p?.Items.Count(x => x.Type == type) > 0)
+            return;
+
+        Core.Instance.LogAll($"Added item ({type}) to: {p.DisplayName} ");
+        p?.AddItem(type);
     }
 }
 
@@ -39,6 +50,8 @@ public class JsonConverterFloat : JsonConverter<float>
 }
 
 
+
+// TODO: Make it hex
 public struct RGB(byte r, byte g, byte b)
 {
     public byte R { get; set; } = r;

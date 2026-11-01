@@ -21,8 +21,8 @@ public class UlepszatorConfig
     // -----
     // Influence milestones
     // -----
-    public int[] FundacjaTokeny { get; set; } = [10, 20, 30, 40];
-    public int[] ChaosTokeny { get; set; } = [10, 20, 30, 40];
+    public int[] FundacjaTokeny { get; set; } = [5, 15, 30, 40];
+    public int[] ChaosTokeny { get; set; } = [5, 15, 30, 40];
 
 
 
@@ -65,7 +65,15 @@ public class UlepszatorConfig
     public int CustomModesApplyDelay { get; set; } = 30;
 
 
-    public bool CustomColorsIsLightsOutOnly { get; set; } = true;
+
+    // -----
+    // Jeżeli to czytasz, to znaczy, że jednak lubisz tego cwela plage 049... Dobrze więc... ALE NA MOICH ZASADACH!!!
+    // -----
+    public int MaxSCP049_2Instances { get; set; } = 1;
+
+
+
+    public bool CustomColors { get; set; } = true;
     public bool RandomRoomColors { get; set; } = false;
     public List<RGB> CustomRoomColors { get; set; } = [
         RGB.FromColor(UnityEngine.Color.magenta),

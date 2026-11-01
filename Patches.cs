@@ -1,20 +1,22 @@
-﻿using PlayerRoles;
+﻿using HarmonyLib;
+using PlayerRoles;
 using PlayerRoles.PlayableScps.Scp049;
 using PlayerRoles.PlayableScps.Scp079;
 using PlayerRoles.PlayableScps.Scp096;
 using PlayerRoles.PlayableScps.Scp106;
 using PlayerRoles.PlayableScps.Scp173;
-using PlayerRoles.PlayableScps.Scp939;
 using PlayerRoles.PlayableScps.Scp3114;
+using PlayerRoles.PlayableScps.Scp939;
 using Respawning;
-using HarmonyLib;
+
+
 
 namespace SCP_ULEPSZATOR;
 
 #region ScpPatches
 
 [HarmonyPatch(typeof(Scp049Role), nameof(Scp049Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class PlagaPatch
+public static class PlagaPatch
 {
     private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
@@ -32,7 +34,7 @@ internal static class PlagaPatch
 }
 
 [HarmonyPatch(typeof(Scp096Role), nameof(Scp096Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class NiesmialekPatch
+public static class NiesmialekPatch
 {
     private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
@@ -52,7 +54,7 @@ internal static class NiesmialekPatch
 }
 
 [HarmonyPatch(typeof(Scp939Role), nameof(Scp939Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class JaszczurPatch
+public static class JaszczurPatch
 {
     private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
@@ -72,7 +74,7 @@ internal static class JaszczurPatch
 }
 
 [HarmonyPatch(typeof(Scp106Role), nameof(Scp106Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class DziadekPatch
+public static class DziadekPatch
 {
     private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
@@ -92,7 +94,7 @@ internal static class DziadekPatch
 }
 
 [HarmonyPatch(typeof(Scp173Role), nameof(Scp173Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class OrzeszekPatch
+public static class OrzeszekPatch
 {
     private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
@@ -111,7 +113,7 @@ internal static class OrzeszekPatch
 }
 
 [HarmonyPatch(typeof(Scp079Role), nameof(Scp079Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class KomputerekPatch
+public static class KomputerekPatch
 {
     private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
@@ -132,7 +134,7 @@ internal static class KomputerekPatch
 
 
 [HarmonyPatch(typeof(Scp3114Role), nameof(Scp3114Role.GetSpawnChance), [typeof(List<RoleTypeId>)])]
-internal static class SzkieletorPatch
+public static class SzkieletorPatch
 {
     private static bool Prefix(List<RoleTypeId> alreadySpawned, ref float __result)
     {
@@ -145,8 +147,7 @@ internal static class SzkieletorPatch
         }
         else Core.Instance.LogAll("Niewalimy szelkietorka");
 
-        return true;
-        
+        return true;   
     }
 }
 
@@ -154,7 +155,7 @@ internal static class SzkieletorPatch
 
 
 [HarmonyPatch(typeof(RespawnTokensManager), nameof(RespawnTokensManager.Milestones), MethodType.Getter)]
-internal static class MilestonesPatch
+public static class MilestonesPatch
 {
     // TODO: Naprawić UI, jeżeli możliwe - 10.10.2026: pierdole to
     private static void Postfix(ref Dictionary<Faction, List<RespawnTokensManager.Milestone>> __result)
@@ -162,5 +163,4 @@ internal static class MilestonesPatch
         __result[Faction.FoundationStaff] = Core.Instance.Config.FundacjaTokeny.GetMilestones();
         __result[Faction.FoundationEnemy] = Core.Instance.Config.ChaosTokeny.GetMilestones();
     }
-    
 }

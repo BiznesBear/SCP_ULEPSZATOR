@@ -10,7 +10,7 @@ public class UlepszatorPlugin : Plugin
 {
     public override string Name { get; } = "Ulepszator";
 
-    public override string Description { get; } = "This ulepszatorPlugin does magic!";
+    public override string Description { get; } = "This UlepszatorPlugin does magic!";
 
 
     public override string Author { get; } = "Me!";
@@ -58,7 +58,7 @@ public class UlepszatorPlugin : Plugin
             switch (args[0].ToLower())
             {
                 case "reload":
-                    Core.Instance.LoadConfig();
+                    Core.Instance.Reload();
                     response = "Reloaded config.";
                     return true;
                 case "rebuilt":
@@ -69,8 +69,10 @@ public class UlepszatorPlugin : Plugin
                     Core.Instance.ResetConfig();
                     response = "Reseted config to defalut. Remeber to rebuilt it to overrite config file with changes.";
                     return true;
+                case "version":
+                    response = $"Ulepszator's version: {Core.Instance.UlepszatorPlugin.Version}";
+                    return true;
                 case "set":
-
                     if(args.Count > 2)
                     {
                         var configType = typeof(UlepszatorConfig);
@@ -122,12 +124,12 @@ public class UlepszatorPlugin : Plugin
                             case "on":
                                 Core.Instance.Config.LightsOutMode = true;
                                 Core.Instance.LightsOutMode(true);
-                                response = "Light out mode is now enabled for this round";
+                                response = "Light out mode is now enabled";
                                 return true;
                             case "off":
                                 Core.Instance.Config.LightsOutMode = false;
                                 Core.Instance.LightsOutMode(false);
-                                response = "Light out mode is now disabled for this round";
+                                response = "Light out mode is now disabled";
                                 return true;
                             default:
                                 response = $"{args[1]} is invalid argument. Aviable options: on, off";
@@ -138,6 +140,9 @@ public class UlepszatorPlugin : Plugin
                     return false;
                 case "path":
                     response = "Config should be located at: " + Core.Instance.ConfigPath;
+                    return true;
+                case "help":
+                    response = "1. `reload` - przeładowuje konfig\r\n2. `rebuilt` - zapisuje plik konfigu obecnie zaladowanym konfigiem\r\n3. `reset` - resetuje konfig (WAŻNE! nie nadpisuje pliku)\r\n4. `set [nazwa wlasciwosci] [wartosc]` - daje mozlwiowc dynamicznej zmiany wartosci w konfigu\r\n5. `settings` - pokazuje konfig\r\n6. `test` - testuje ruzne ficzery tego cacka \r\n    - `engage [1/2/3/all]` - aktuwuje generatory\r\n    - `fastGenerators` - generatory aktuwujom sie w 5 sekund\r\n    - `warheadMessage` - sprawia ze cassie sie zesra i powie cos ciekawego\r\n7. `lightsOut [on/off]` - włącza/wyłącza tryb lightout podczas istnienia serwera\r\n";
                     return true;
                 case "test":
                     if(args.Count > 1)

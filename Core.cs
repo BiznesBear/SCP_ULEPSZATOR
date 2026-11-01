@@ -3,9 +3,7 @@ using LabApi.Features.Wrappers;
 using MEC;
 using MelonLoader;
 using PlayerRoles;
-using RemoteAdmin.Communication;
 using Respawning;
-using Respawning.Graphics;
 using System.Text.Json;
 using UnityEngine;
 
@@ -18,10 +16,12 @@ namespace SCP_ULEPSZATOR;
 
 public class Core : MelonMod
 {
+    public const string WarheadDetonationMessage = "Generator over load .G2 .G3 .G7 .G6 .G5 .G5 ALL GENERATORS .G5 .G3 .G6 .G6 .G6 warhead activated and .G3 .G6 .G5 locked .G6 .G5 .G2 ALL PERSON CAN DETONATION .G3 .G3";
     public static Core Instance { get; private set; }
     public string ConfigPath { get; private set; }
-    public  UlepszatorConfig Config { get; private set; } = new();
+    public UlepszatorConfig Config { get; private set; } = new();
     public bool LoadedPlugin { get; private set; }
+    public UlepszatorPlugin UlepszatorPlugin { get; private set; }
 
     public static readonly JsonSerializerOptions jsonSerializerOptions = new() { 
         WriteIndented = true,
@@ -29,9 +29,6 @@ public class Core : MelonMod
     };
     
     private const int FacilitySceneIndex = 2; 
-    private UlepszatorPlugin ulepszatorPlugin;
-
-    public const string WarheadDetonationMessage = "Generator over load .G2 .G3 .G7 .G6 .G5 .G5 ALL GENERATORS .G5 .G3 .G6 .G6 .G6 warhead activated and .G3 .G6 .G5 locked .G6 .G5 .G2 ALL PERSON CAN DETONATION .G3 .G3";
 
 
     public override void OnInitializeMelon()
@@ -45,14 +42,9 @@ public class Core : MelonMod
         // Load/rebuilt Config
         LoadConfig();
 
-        
         // Patch
         HarmonyInstance.PatchAll();
-
-        ulepszatorPlugin = new();        
     }
-
-    // TODO: dodac kiedys opcje reloadowania moda by wyczyscic wszystkie eventy itp.
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
@@ -61,38 +53,28 @@ public class Core : MelonMod
 
 
         if (!LoadedPlugin)
-        { 
-            ulepszatorPlugin.Enable();
+        {
+            UlepszatorPlugin ??= new();
+
+            UlepszatorPlugin.Enable();
             RegisterEvents();
 
             LoadedPlugin = true;
         }
 
-
-        // Special chaos & mtf classes spawn chances
-        //if (buildIndex == FacilitySceneIndex) // Facility
-        //{
-        //    LogAll("Lights out mode is enabled: " + Config.LightsOutMode);
-            
-        //    ApplyValues();
-
-        //    // TODO: Dodać kiedyś custom influence objectivy
-        //    //FactionInfluenceManager.Objectives.Add(new Objective)
-
-
-        //    // TODO: Zpatchować kiedyś te wyświetlane influence thresholdy
-        //    //var influenceDisplays = GameObject.FindObjectsByType<InfluenceDisplay>(FindObjectsSortMode.None);
-        //    //foreach(var display in influenceDisplays)
-        //    //{
-        //    //    display.
-        //    //}
-        //}
-
+        if(buildIndex == FacilitySceneIndex)
+        {
+            // Load all necesery things for scene here 
+            ApplyValues();
+        }
+        
     }
 
 
     public void ApplyValues()
     {
+        LogAll("Applying custom values...");
+
         if (Config.MtfCapitanSpawnChance >= 0)
             RespawnWaves.PrimaryMtfWave.CaptainsPercentage = Config.MtfCapitanSpawnChance;
 
@@ -116,37 +98,70 @@ public class Core : MelonMod
 
     public void ApplyModes()
     {
+        LogAll("Applying custom modes...");
         LightsOutMode(Config.LightsOutMode);
     }
 
+    public void ApplyCustomLights()
+    {
+        if (!Config.CustomColors)
+            return;
 
-    // TODO: Add function for unregistering this things
+        if (Config.RandomRoomColors)
+        {
+            foreach (var l in LightsController.List)
+                l.OverrideLightsColor = new(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
+        }
+        else if (Config.CustomRoomColors.Count > 1)
+        {
+            foreach (var l in LightsController.List)
+                l.OverrideLightsColor = Config.CustomRoomColors[UnityEngine.Random.Range(0, Config.CustomRoomColors.Count)].GetColor();
+        }
+    }
+
+
+    public void Reload()
+    {
+        LoadConfig();
+        
+        ApplyValues();
+        ApplyModes();
+        ApplyCustomLights();
+    }
+
 
     public void RegisterEvents()
     {
+        LogAll("Registering events...");
         PlayerEvents.Kicking += (e) =>
         {
             LogAll($"Server is kicking: {e.Player.DisplayName} for {e.Reason}; Issuer: {e.Issuer.DisplayName}; ");
         };
 
+
         PlayerEvents.Spawned += (e) =>
         {
-            // ahhh. odwleczanie w czasie czegoś co pewnie można zrobić asynchronicznie albo normalnie jak człowiek. ale nie, bo po co skoro można iść drogą inteligenta
+            // ahhh. odwleczanie w czasie czegoś co pewnie można zrobić asynchronicznie albo normalnie jak człowiek.
+            // ale nie, bo po co skoro można iść drogą inteligenta i po prostu dodać delay =))))
             Timing.CallDelayed(1, () => {
-                e?.Player?.Scale = Vector3.one;
-                
+                e.Player?.Scale = Vector3.one;
+
                 if (Config.LightsOutMode)
-                    e?.Player?.AddItem(ItemType.Flashlight);
+                    e.Player.GivePlayerIfNeeded(ItemType.Flashlight);
+                    
             });
         };
 
-        ServerEvents.RoundStarted += () =>
+        ServerEvents.WaveRespawning += (_) =>
         {
             ApplyValues();
-            Timing.CallDelayed(Config.CustomModesApplyDelay, ApplyModes);
+        };
 
-            if (!Config.CustomColorsIsLightsOutOnly || Config.LightsOutMode)
-                ApplyCustomLights();
+
+        ServerEvents.RoundStarted += () =>
+        {
+            ApplyCustomLights();
+            Timing.CallDelayed(Config.CustomModesApplyDelay, ApplyModes);
         };
 
 
@@ -159,16 +174,18 @@ public class Core : MelonMod
             if (e.IsTails)
             {
                 if (KrasnalizePlayer(e.Player))
-                {
                     LogAll("Successfullly Krasnalized " + e.Player.DisplayName);
-                }
+                else
+                    LogAll($"{e.Player.DisplayName} jest juz wystarczajoco krasnalem");
+
             }
             else
             {
                 if(GigantizePlayer(e.Player))
-                {
                     LogAll("Successfullly Gigantized " + e.Player.DisplayName);
-                }
+                else
+                    LogAll($"{e.Player.DisplayName} jest juz wystarczajoco gigantem");
+
             }
         };
 
@@ -189,10 +206,22 @@ public class Core : MelonMod
                 e.IsAllowed = false;
         };
 
+        
+        Scp049Events.StartingResurrection += (e) =>
+        {
+            if (Config.MaxSCP049_2Instances < 0)
+                return;
+
+
+            if(Player.List.Count(p => p.Role == RoleTypeId.Scp0492) >= Config.MaxSCP049_2Instances)
+                e.CanResurrect = false;
+        };
+
         ObjectiveEvents.ActivatedGeneratorCompleted += (e) => {
+
             int count = Generator.List.Count(g => g.Engaged);
 
-            if (Config.LightsOutMode)
+            if (Config.LightsOutMode) // tood: dodać zwiększanie natęzenia swiatła w placówce z każdą aktywacją
             {
                 Map.TurnOnLights();
 
@@ -213,9 +242,23 @@ public class Core : MelonMod
             }
         };
 
+        PlayerEvents.InteractedWarheadLever += (e) =>
+        {
+            if (!e.Enabled)
+                return;
+
+            static void AnnounceWarheadReady() => Announcer.GlitchyMessage("WARHEAD WARHEAD WARHEAD WARHEAD.G3 READY READY READY READY", 0.3f, 0.4f);
+
+            if (Announcer.IsSpeaking)
+                Timing.CallDelayed(10, AnnounceWarheadReady);
+            else
+                AnnounceWarheadReady();
+        };
+
         PlayerEvents.UnlockingWarheadButton += (e) =>
         {
-            e.IsAllowed = (Generator.List.Count(g => g.Engaged) > 2 && Config.GeneratorActivationWarheadMechanic) || (Config.WarheadButtonPermissions > 0 && e.Player.CurrentItem.Category == ItemCategory.Keycard && ((KeycardItem)e.Player.CurrentItem).Permissions == Config.WarheadButtonPermissions);
+            e.IsAllowed =  (e.IsAllowed || Generator.List.Count(g => g.Engaged) > 2 && Config.GeneratorActivationWarheadMechanic) || (Config.WarheadButtonPermissions > 0 && e.Player.CurrentItem.Category == ItemCategory.Keycard && ((KeycardItem)e.Player.CurrentItem).Permissions == Config.WarheadButtonPermissions);
+            
             if (e.IsAllowed)
             {
                 static void AnnounceWarheadReady() => Announcer.GlitchyMessage("WARHEAD .G3 READY TO DESTRUCT DETONATION", 0.3f, 0.4f);
@@ -225,29 +268,8 @@ public class Core : MelonMod
                 else
                     AnnounceWarheadReady();
             }
-            
         };
 
-        WarheadEvents.Started += (e) =>
-        {
-            if (Generator.List.Count(g => g.Engaged) > 2)
-                Warhead.DetonationTime /= 2;
-        };
-    }
-
-    public void ApplyCustomLights()
-    {
-        if (Config.RandomRoomColors)
-        {
-            foreach (var l in Map.RoomLights)
-                l.OverrideLightsColor = new(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-
-        }
-        else if (Config.CustomRoomColors.Count > 1)
-        {
-            foreach (var l in Map.RoomLights)
-                l.OverrideLightsColor = Config.CustomRoomColors[UnityEngine.Random.Range(0, Config.CustomRoomColors.Count)].GetColor();
-        }
     }
 
     public void LoadConfig()
@@ -271,7 +293,7 @@ public class Core : MelonMod
         }
         finally
         {
-            LogAll($"Config successfuly loaded from.");
+            LogAll($"Config successfuly loaded...");
         }
     }
 
@@ -293,7 +315,6 @@ public class Core : MelonMod
         ServerConsole.AddLog(text, System.ConsoleColor.Magenta);
     }
 
-
     public void LightsOutMode(bool on)
     {
         if(on)
@@ -306,7 +327,6 @@ public class Core : MelonMod
         else
         {
             LogAll("Lights out mode disabled");
-            Map.ResetColorOfLights();
             Map.TurnOnLights();
         }
     }
@@ -314,25 +334,13 @@ public class Core : MelonMod
     public void GiveAllPlayersIfNeeded(ItemType type)
     {
         foreach (var p in Player.List)
-            GivePlayerIfNeeded(p, type);
-    }
-
-    public void GivePlayerIfNeeded(Player p, ItemType type)
-    {
-        if (p?.Items.Count(x => x.Type == type) > 0)
-            return;
-
-        LogAll($"Added item ({type}) to: {p.DisplayName} ");
-        p?.AddItem(type);
-    }
+            p.GivePlayerIfNeeded(type);
+    } 
 
     public bool KrasnalizePlayer(Player player)
     {
         if ((player.MaxHealth - Config.KrasnalHealthRemove < 100 - Config.KrasnalHealthRemove * Config.MaxFlips) || player.MaxHealth > 100)
-        {
-            LogAll($"{player.DisplayName} jest juz wystarczajoco krasnalem");
             return false;
-        }
 
 
         player.Scale = player.Scale.ModifyVector3(v => v * Config.KrasnalScaleFactor);
@@ -350,10 +358,7 @@ public class Core : MelonMod
     public bool GigantizePlayer(Player player)
     {
         if ((player.MaxHealth + Config.GigantHealthAdd > 100 + Config.GigantHealthAdd * Config.MaxFlips) || player.MaxHealth < 100)
-        {
-            LogAll($"{player.DisplayName} jest juz wystarczajoco gigantem");
             return false;
-        }
 
 
         player.Scale = player.Scale.ModifyVector3(v => v * Config.GigantScaleFactor);
