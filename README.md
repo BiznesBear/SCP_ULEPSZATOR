@@ -49,12 +49,55 @@ Generalnie to wygloda tak:
   "MiniWaveSpecjalist": true,
   "CoinFlipCustomMechanic": true,
   "KrasnalScaleFactor": 0.7,
-  "KrasnalHealthRemoveFactor": 30,
-  "GigantScaleFactor": 1.2,
-  "GigantHealthAddFactor": 41,
+  "KrasnalHealthRemove": 30,
+  "GigantScaleFactor": 1.1,
+  "GigantHealthAdd": 50,
   "MaxFlips": 2,
   "WarheadButtonPermissions": 16,
-  "GeneratorActivationWarheadMechanic": true
+  "GeneratorActivationWarheadMechanic": true,
+  "LightsOutMode": false,
+  "GeneratorElectricityPower": 90,
+  "CustomModesApplyDelay": 30,
+  "MaxSCP049_2Instances": 1,
+  "CustomColors": true,
+  "RandomRoomColors": false,
+  "CustomRoomColors": [
+    {
+      "R": 255,
+      "G": 0,
+      "B": 255
+    },
+    {
+      "R": 0,
+      "G": 0,
+      "B": 255
+    },
+    {
+      "R": 0,
+      "G": 255,
+      "B": 0
+    },
+    {
+      "R": 255,
+      "G": 0,
+      "B": 0
+    },
+    {
+      "R": 255,
+      "G": 235,
+      "B": 4
+    },
+    {
+      "R": 0,
+      "G": 255,
+      "B": 255
+    },
+    {
+      "R": 255,
+      "G": 255,
+      "B": 255
+    }
+  ]
 }
 ```
 
@@ -79,4 +122,5 @@ Jak dasz ziomek na coś minus jeden to bedom uzywane defultowe ustawienia Scp se
     - Impostor (zbuntowana zbuntowana klasa D, czyli taka która toi po stronie placówki), 
     - Technik (może robić ciekawe rzeczy z kartami i permisjami do drzwi), 
     - Posiadacz jąder - zrespawnowany maczetą dostaje 2 odibjające się kulki
-- Poprawne wyświetlanie influenca w grze, bo by się przydało
+- Poprawne wyświetlanie influenca w grze, bo by się przydało (jednakże nie jest to możlwie do naprawienia z poziomu serwera)
+- Przeniesienie tego do full do LabApi od pónocnego drzewa
