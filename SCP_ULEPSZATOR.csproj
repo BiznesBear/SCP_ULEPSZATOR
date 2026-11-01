@@ -370,7 +370,6 @@
 
 	<ItemGroup>
 		<Compile Include="Core.cs" />
-		<Compile Include="CustomRole.cs" />
 		<Compile Include="Helpers.cs" />
 		<Compile Include="Patches.cs" />
 		<Compile Include="UlepszatorPlugin.cs" />
