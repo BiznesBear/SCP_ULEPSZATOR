@@ -124,3 +124,9 @@ Jak dasz ziomek na coś minus jeden to bedom uzywane defultowe ustawienia Scp se
     - Posiadacz jąder - zrespawnowany maczetą dostaje 2 odibjające się kulki
 - Poprawne wyświetlanie influenca w grze, bo by się przydało (jednakże nie jest to możlwie do naprawienia z poziomu serwera)
 - Przeniesienie tego do full do LabApi od pónocnego drzewa
+- Naprawa systemu przechowywania kolorów, bo ten jest beznadziejny
+- Zangielszczenie wszystkich nazw, danie im małych liter
+- Dodanie `ulepszator update` która pozwala na aktualizacje moda
+- Spawnowanie tylko suppoortowych ruól jako 2 scp ✅
+- reseructowanie tylko normalnych cial i nie slugusuw
+- dodać trackowanie ile razy zabezpieczyło się danego scp 

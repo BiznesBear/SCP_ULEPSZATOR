@@ -29,6 +29,12 @@ public static class PlagaPatch
         }
         else Core.Instance.LogAll("Niewalimy plagi");
 
+        if(Core.Instance.Config.ForceSecondarySCPSupportRole && alreadySpawned.ContainsStandardScp(out int c) && c < 2)
+        {
+            __result = 0;
+            Core.Instance.LogAll("Walić plage, bo niesmialek i komputerek wazniejsze");
+        }
+
         return true;
     }
 }
@@ -67,6 +73,11 @@ public static class JaszczurPatch
         }
         else Core.Instance.LogAll("Niewalimy jaszczur");
 
+        if (Core.Instance.Config.ForceSecondarySCPSupportRole && alreadySpawned.ContainsStandardScp(out int c) && c < 2)
+        {
+            __result = 0;
+            Core.Instance.LogAll("Walić plage, bo niesmialek i komputerek wazniejsze");
+        }
 
         return true;
 
@@ -87,6 +98,11 @@ public static class DziadekPatch
         }
         else Core.Instance.LogAll("Niewalimy dziadka");
 
+        if (Core.Instance.Config.ForceSecondarySCPSupportRole && alreadySpawned.ContainsStandardScp(out int c) && c < 2)
+        {
+            __result = 0;
+            Core.Instance.LogAll("Walić plage, bo niesmialek i komputerek wazniejsze");
+        }
 
         return true;
 
@@ -107,6 +123,12 @@ public static class OrzeszekPatch
         }
         else Core.Instance.LogAll("Niewalimy orzeszka");
 
+        if (Core.Instance.Config.ForceSecondarySCPSupportRole && alreadySpawned.ContainsStandardScp(out int c) && c < 2)
+        {
+            __result = 0;
+            Core.Instance.LogAll("Walić plage, bo niesmialek i komputerek wazniejsze");
+        }
+
         return true;
 
     }
@@ -125,6 +147,8 @@ public static class KomputerekPatch
             return false;
         }
         else Core.Instance.LogAll("Niewalimy komputerka");
+
+
 
         return true;
 
@@ -146,6 +170,12 @@ public static class SzkieletorPatch
             return false;
         }
         else Core.Instance.LogAll("Niewalimy szelkietorka");
+
+        if (Core.Instance.Config.ForceSecondarySCPSupportRole && alreadySpawned.ContainsStandardScp(out int c) && c < 2)
+        {
+            __result = 0;
+            Core.Instance.LogAll("Walić plage, bo niesmialek i komputerek wazniejsze");
+        }
 
         return true;   
     }

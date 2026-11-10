@@ -205,4 +205,25 @@ public class UlepszatorPlugin : Plugin
             return false;
         }
     }
+
+    //public static void DisplayTextForPlayer(Player player)
+    //{
+    //    canvas = DisplayCanvas.Create();
+    //    canvas.DefaultVisibility = CanvasVisibility.Visible;
+    //    canvas.Background.Color = new Color(0, 0, 0, 0.8f);
+
+    //    // Add text
+    //    DisplayText welcomeText = canvas.AddText("Welcome to the Server!");
+    //    welcomeText.Text.Font = FontType.RobotoBold;
+    //    welcomeText.Text.FontSize = 48f;
+    //    welcomeText.Text.Color = Color.white;
+    //    welcomeText.Text.Align = TextAnchor.MiddleCenter;
+
+    //    // Center the text
+    //    canvas.Align.AlignItems = Align.Center;
+    //    canvas.Align.JustifyContent = Justify.Center;
+
+    //    // Send to all players
+    //    canvas.Spawn();
+    //}
 }

@@ -1,5 +1,5 @@
 ﻿using Interactables.Interobjects.DoorUtils;
-using System.Drawing;
+using UnityEngine;
 namespace SCP_ULEPSZATOR;
 
 
@@ -16,6 +16,8 @@ public class UlepszatorConfig
     public float SzarekSpawnChace { get; set; } = -1f;
     public float KomputerekSpawnChace { get; set; } = -1f;
     public float SzkieletorSpawnChace { get; set; } = -1f;
+
+    public bool ForceSecondarySCPSupportRole { get; set; } = true;
 
 
     // -----
@@ -37,7 +39,6 @@ public class UlepszatorConfig
     public float ChaosShotgunSpawnChance { get; set; } = 0.3f;
     public bool MiniWaveSpecjalist { get; set; } = true;
 
-
     // -----
     // Coin flip
     // -----
@@ -54,15 +55,15 @@ public class UlepszatorConfig
     // Warhead
     // -----
     public DoorPermissionFlags WarheadButtonPermissions { get; set; } = DoorPermissionFlags.ContainmentLevelOne; // 0 - defalut; ALL: 65535. NORMAL: 64. JANITOR: 16
-    public bool GeneratorActivationWarheadMechanic { get; set; } = true;
+    public bool GeneratorActivateWarheadMechanic { get; set; } = true;
 
 
     // -----
     // Custom modes
     // -----
+    public int CustomModesApplyDelay { get; set; } = 30;
     public bool LightsOutMode { get; set; } = false;
     public int GeneratorElectricityPower { get; set; } = 90;
-    public int CustomModesApplyDelay { get; set; } = 30;
 
 
 
@@ -70,19 +71,24 @@ public class UlepszatorConfig
     // Jeżeli to czytasz, to znaczy, że jednak lubisz tego cwela plage 049... Dobrze więc... ALE NA MOICH ZASADACH!!!
     // -----
     public int MaxSCP049_2Instances { get; set; } = 1;
+    public bool BlockSCP049_2Resurection { get; set; } = true;
 
 
-
+    // -----
+    // Custom room colors
+    // -----
     public bool CustomColors { get; set; } = true;
     public bool RandomRoomColors { get; set; } = false;
-    public List<RGB> CustomRoomColors { get; set; } = [
-        RGB.FromColor(UnityEngine.Color.magenta),
-        RGB.FromColor(UnityEngine.Color.blue),
-        RGB.FromColor(UnityEngine.Color.green),
-        RGB.FromColor(UnityEngine.Color.red),
-        RGB.FromColor(UnityEngine.Color.yellow),
-        RGB.FromColor(UnityEngine.Color.cyan),
-        RGB.FromColor(UnityEngine.Color.white),
+    public List<string> CustomRoomColors { get; set; } = [
+        Color.magenta.GetHexString(),
+        Color.blue.GetHexString(),
+        Color.green.GetHexString(),
+        Color.red.GetHexString(),
+        Color.yellow.GetHexString(),
+        Color.cyan.GetHexString(),
+        Color.white.GetHexString(),
     ];
+
+    public IReadOnlyList<Color> GetRoomColors() => CustomRoomColors.ConvertAll<Color>(x => x.GetHexColor());
 
 }

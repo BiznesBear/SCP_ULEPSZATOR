@@ -5,6 +5,7 @@ using MelonLoader;
 using PlayerRoles;
 using Respawning;
 using System.Text.Json;
+using PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers;
 using UnityEngine;
 
 
@@ -115,7 +116,7 @@ public class Core : MelonMod
         else if (Config.CustomRoomColors.Count > 1)
         {
             foreach (var l in LightsController.List)
-                l.OverrideLightsColor = Config.CustomRoomColors[UnityEngine.Random.Range(0, Config.CustomRoomColors.Count)].GetColor();
+                l.OverrideLightsColor = Config.GetRoomColors()[UnityEngine.Random.Range(0, Config.CustomRoomColors.Count)];
         }
     }
 
@@ -137,7 +138,7 @@ public class Core : MelonMod
         {
             LogAll($"Server is kicking: {e.Player.DisplayName} for {e.Reason}; Issuer: {e.Issuer.DisplayName}; ");
         };
-
+        
 
         PlayerEvents.Spawned += (e) =>
         {
@@ -151,6 +152,8 @@ public class Core : MelonMod
                     
             });
         };
+
+
 
         ServerEvents.WaveRespawning += (_) =>
         {
@@ -213,7 +216,7 @@ public class Core : MelonMod
                 return;
 
 
-            if(Player.List.Count(p => p.Role == RoleTypeId.Scp0492) >= Config.MaxSCP049_2Instances)
+            if(Player.List.Count(p => p.Role == RoleTypeId.Scp0492) >= Config.MaxSCP049_2Instances || (Config.BlockSCP049_2Resurection && e.Ragdoll.Role == RoleTypeId.Scp0492))
                 e.CanResurrect = false;
         };
 
@@ -229,7 +232,7 @@ public class Core : MelonMod
                     Timing.CallDelayed(Config.GeneratorElectricityPower, Map.TurnOffLights);
             }
 
-            if (Config.GeneratorActivationWarheadMechanic)
+            if (Config.GeneratorActivateWarheadMechanic)
                 return;
 
             if (count > 2)
@@ -257,7 +260,7 @@ public class Core : MelonMod
 
         PlayerEvents.UnlockingWarheadButton += (e) =>
         {
-            e.IsAllowed =  (e.IsAllowed || Generator.List.Count(g => g.Engaged) > 2 && Config.GeneratorActivationWarheadMechanic) || (Config.WarheadButtonPermissions > 0 && e.Player.CurrentItem.Category == ItemCategory.Keycard && ((KeycardItem)e.Player.CurrentItem).Permissions == Config.WarheadButtonPermissions);
+            e.IsAllowed =  (e.IsAllowed || Generator.List.Count(g => g.Engaged) > 2 && Config.GeneratorActivateWarheadMechanic) || (Config.WarheadButtonPermissions > 0 && e.Player.CurrentItem.Category == ItemCategory.Keycard && ((KeycardItem)e.Player.CurrentItem).Permissions == Config.WarheadButtonPermissions);
             
             if (e.IsAllowed)
             {
@@ -351,7 +354,8 @@ public class Core : MelonMod
             player.Kill("Coś ty najlepszego odjaniepawlił", $"{player.DisplayName} fliped AnnounceWarheadReady coin one");
 
         player.GiveRandomCandy();
-        player.Emotion = PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers.EmotionPresetType.Ogre;
+        // TODO: dodac losowanie emotki
+        player.Emotion = EmotionPresetType.Ogre;
         return true;
     }
 
@@ -363,7 +367,7 @@ public class Core : MelonMod
 
         player.Scale = player.Scale.ModifyVector3(v => v * Config.GigantScaleFactor);
         player.MaxHealth += Config.GigantHealthAdd;
-        player.Emotion = PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers.EmotionPresetType.AwkwardSmile;
+        player.Emotion = EmotionPresetType.AwkwardSmile;
         return true;
     }
 }
