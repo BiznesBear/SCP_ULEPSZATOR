@@ -154,7 +154,6 @@ public class Core : MelonMod
         };
 
 
-
         ServerEvents.WaveRespawning += (_) =>
         {
             ApplyValues();
@@ -247,7 +246,7 @@ public class Core : MelonMod
 
         PlayerEvents.InteractedWarheadLever += (e) =>
         {
-            if (!e.Enabled)
+            if (!e.Enabled || !Config.WarheadMessages)
                 return;
 
             static void AnnounceWarheadReady() => Announcer.GlitchyMessage("WARHEAD WARHEAD WARHEAD WARHEAD.G3 READY READY READY READY", 0.3f, 0.4f);
@@ -262,7 +261,7 @@ public class Core : MelonMod
         {
             e.IsAllowed =  (e.IsAllowed || Generator.List.Count(g => g.Engaged) > 2 && Config.GeneratorActivateWarheadMechanic) || (Config.WarheadButtonPermissions > 0 && e.Player.CurrentItem.Category == ItemCategory.Keycard && ((KeycardItem)e.Player.CurrentItem).Permissions == Config.WarheadButtonPermissions);
             
-            if (e.IsAllowed)
+            if (e.IsAllowed && Config.WarheadMessages)
             {
                 static void AnnounceWarheadReady() => Announcer.GlitchyMessage("WARHEAD .G3 READY TO DESTRUCT DETONATION", 0.3f, 0.4f);
                 

@@ -54,8 +54,9 @@ public class UlepszatorConfig
     // -----
     // Warhead
     // -----
-    public DoorPermissionFlags WarheadButtonPermissions { get; set; } = DoorPermissionFlags.ContainmentLevelOne; // 0 - defalut; ALL: 65535. NORMAL: 64. JANITOR: 16
+    public DoorPermissionFlags WarheadButtonPermissions { get; set; } = DoorPermissionFlags.ContainmentLevelOne; // 0 - defalut; ALL: 65535. standard O5: 64. JANITOR: 16
     public bool GeneratorActivateWarheadMechanic { get; set; } = true;
+    public bool WarheadMessages { get; set; } = true;
 
 
     // -----
