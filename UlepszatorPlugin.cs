@@ -2,6 +2,7 @@
 using LabApi.Features;
 using LabApi.Features.Wrappers;
 using LabApi.Loader.Features.Plugins;
+using MelonLoader;
 using System.Reflection;
 using System.Text.Json;
 
@@ -16,8 +17,7 @@ public class UlepszatorPlugin : Plugin
     public override string Author { get; } = "Me!";
 
 
-    public override Version Version { get; } = new Version(1, 0, 0, 0);
-
+    public override Version Version { get; } = new Version(1, 2, 3, 4);
 
     public override Version RequiredApiVersion { get; } = new(LabApiProperties.CompiledVersion);
 
@@ -70,7 +70,7 @@ public class UlepszatorPlugin : Plugin
                     response = "Reseted config to defalut. Remeber to rebuilt it to overrite config file with changes.";
                     return true;
                 case "version":
-                    response = $"Ulepszator's version: {Core.Instance.UlepszatorPlugin.Version}";
+                    response = $"Ulepszator Version(id): {Updater.Version}; Latest version: {Updater.CheckLatestVersion()}";
                     return true;
                 case "set":
                     if(args.Count > 2)

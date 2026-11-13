@@ -13,6 +13,9 @@
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="version.txt" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp-firstpass">
@@ -374,11 +377,18 @@
 		<Compile Include="Patches.cs" />
 		<Compile Include="UlepszatorPlugin.cs" />
 		<Compile Include="UlepszatorConfig.cs" />
+		<Compile Include="Updater.cs" />
 		<Content Include="Directory.Build.props" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="System.Text.Json" Version="10.0.14" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="version.txt">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

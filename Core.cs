@@ -3,9 +3,10 @@ using LabApi.Features.Wrappers;
 using MEC;
 using MelonLoader;
 using PlayerRoles;
-using Respawning;
-using System.Text.Json;
 using PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers;
+using Respawning;
+using System.Net;
+using System.Text.Json;
 using UnityEngine;
 
 
@@ -18,16 +19,20 @@ namespace SCP_ULEPSZATOR;
 public class Core : MelonMod
 {
     public const string WarheadDetonationMessage = "Generator over load .G2 .G3 .G7 .G6 .G5 .G5 ALL GENERATORS .G5 .G3 .G6 .G6 .G6 warhead activated and .G3 .G6 .G5 locked .G6 .G5 .G2 ALL PERSON CAN DETONATION .G3 .G3";
+
+   
     public static Core Instance { get; private set; }
     public string ConfigPath { get; private set; }
     public UlepszatorConfig Config { get; private set; } = new();
-    public bool LoadedPlugin { get; private set; }
     public UlepszatorPlugin UlepszatorPlugin { get; private set; }
+
+    public bool LoadedPlugin { get; private set; }
 
     public static readonly JsonSerializerOptions jsonSerializerOptions = new() { 
         WriteIndented = true,
         Converters = { new JsonConverterFloat() }  
     };
+    
     
     private const int FacilitySceneIndex = 2; 
 
@@ -369,4 +374,6 @@ public class Core : MelonMod
         player.Emotion = EmotionPresetType.AwkwardSmile;
         return true;
     }
+
+    
 }

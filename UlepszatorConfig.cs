@@ -90,6 +90,6 @@ public class UlepszatorConfig
         Color.white.GetHexString(),
     ];
 
-    public IReadOnlyList<Color> GetRoomColors() => CustomRoomColors.ConvertAll<Color>(x => x.GetHexColor());
+    public IReadOnlyList<Color> GetRoomColors() => CustomRoomColors.ConvertAll(x => x.GetHexColor());
 
 }
