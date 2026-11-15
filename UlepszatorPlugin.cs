@@ -5,6 +5,7 @@ using LabApi.Loader.Features.Plugins;
 using MelonLoader;
 using System.Reflection;
 using System.Text.Json;
+using UnityEngine.ProBuilder.MeshOperations;
 
 namespace SCP_ULEPSZATOR;
 public class UlepszatorPlugin : Plugin
@@ -70,7 +71,47 @@ public class UlepszatorPlugin : Plugin
                     response = "Reseted config to defalut. Remeber to rebuilt it to overrite config file with changes.";
                     return true;
                 case "version":
-                    response = $"Ulepszator Version(id): {Updater.Version}; Latest version: {Updater.CheckLatestVersion()}";
+                    response = $"Ulepszator's Version: {Updater.Version};";
+                    return true;
+                case "newestversion" or "latestversion":
+                    response = $"Latest version: {Updater.CheckLatestVersion()}";
+                    return true;
+                case "update":
+                    if (args.Count < 2)
+                    {
+                        var outdated = Updater.CanUpdate(out var r);
+                        response = r;
+                        if(outdated)
+                        {
+                            Core.Instance.LogAll("Downloading latest release...");
+                            var success = Updater.DownloadLatest();
+                            response = success? "Downloaded latest release. Restart app to apply changes" : "Cannot download latest release... An error occured";
+                            return success;
+
+
+                        }
+
+                    }
+                    else if (args.Count > 1)
+                    {
+                        // Force update
+                        if (args[1].ToLower() == "force")
+                        {
+                            Core.Instance.LogAll("Downloading latest release...");
+                            var success = Updater.DownloadLatest();
+                            response = success ? "Downloaded latest release. Restart app to apply changes" : "Cannot download latest release... An error occured";
+                            return success;
+                        }
+
+                        response = "Invalid ulepszator update args";
+                        return false;
+                    }
+                    else
+                    {
+                        response = "Invalid ulepszator update args";
+                        return false;
+                    }
+
                     return true;
                 case "set":
                     if(args.Count > 2)
@@ -206,24 +247,4 @@ public class UlepszatorPlugin : Plugin
         }
     }
 
-    //public static void DisplayTextForPlayer(Player player)
-    //{
-    //    canvas = DisplayCanvas.Create();
-    //    canvas.DefaultVisibility = CanvasVisibility.Visible;
-    //    canvas.Background.Color = new Color(0, 0, 0, 0.8f);
-
-    //    // Add text
-    //    DisplayText welcomeText = canvas.AddText("Welcome to the Server!");
-    //    welcomeText.Text.Font = FontType.RobotoBold;
-    //    welcomeText.Text.FontSize = 48f;
-    //    welcomeText.Text.Color = Color.white;
-    //    welcomeText.Text.Align = TextAnchor.MiddleCenter;
-
-    //    // Center the text
-    //    canvas.Align.AlignItems = Align.Center;
-    //    canvas.Align.JustifyContent = Justify.Center;
-
-    //    // Send to all players
-    //    canvas.Spawn();
-    //}
 }

@@ -19,7 +19,6 @@ public class UlepszatorConfig
 
     public bool ForceSecondarySCPSupportRole { get; set; } = true;
 
-
     // -----
     // Influence milestones
     // -----

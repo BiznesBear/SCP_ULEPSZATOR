@@ -30,15 +30,16 @@ Generalnie to wygloda tak:
   "SzarekSpawnChace": -1,
   "KomputerekSpawnChace": -1,
   "SzkieletorSpawnChace": -1,
+  "ForceSecondarySCPSupportRole": true,
   "FundacjaTokeny": [
-    10,
-    20,
+    5,
+    15,
     30,
     40
   ],
   "ChaosTokeny": [
-    10,
-    20,
+    5,
+    15,
     30,
     40
   ],
@@ -54,49 +55,23 @@ Generalnie to wygloda tak:
   "GigantHealthAdd": 50,
   "MaxFlips": 2,
   "WarheadButtonPermissions": 16,
-  "GeneratorActivationWarheadMechanic": true,
+  "GeneratorActivateWarheadMechanic": true,
+  "WarheadMessages": true,
+  "CustomModesApplyDelay": 30,
   "LightsOutMode": false,
   "GeneratorElectricityPower": 90,
-  "CustomModesApplyDelay": 30,
   "MaxSCP049_2Instances": 1,
+  "BlockSCP049_2Resurection": true,
   "CustomColors": true,
   "RandomRoomColors": false,
   "CustomRoomColors": [
-    {
-      "R": 255,
-      "G": 0,
-      "B": 255
-    },
-    {
-      "R": 0,
-      "G": 0,
-      "B": 255
-    },
-    {
-      "R": 0,
-      "G": 255,
-      "B": 0
-    },
-    {
-      "R": 255,
-      "G": 0,
-      "B": 0
-    },
-    {
-      "R": 255,
-      "G": 235,
-      "B": 4
-    },
-    {
-      "R": 0,
-      "G": 255,
-      "B": 255
-    },
-    {
-      "R": 255,
-      "G": 255,
-      "B": 255
-    }
+    "#FF00FF",
+    "#0000FF",
+    "#00FF00",
+    "#FF0000",
+    "#FFEB04",
+    "#00FFFF",
+    "#FFFFFF"
   ]
 }
 ```
@@ -126,6 +101,7 @@ Jak dasz ziomek na coś minus jeden to bedom uzywane defultowe ustawienia Scp se
 - Przeniesienie tego do full do LabApi od pónocnego drzewa
 - Naprawa systemu przechowywania kolorów, bo ten jest beznadziejny ✅
 - Zangielszczenie wszystkich nazw, danie im małych liter
-- Dodanie `ulepszator update` która pozwala na aktualizacje moda
+- Dodanie `ulepszator update` która pozwala na aktualizacje moda oraz github actions
 - Spawnowanie tylko suppoortowych ruól jako 2 scp ✅
 - reseructowanie tylko normalnych cial i nie slugusuw ✅
+- dodac komende na restorowanie wszystkich pól w pliku konfiguracyjnym (tak, by mozna bylo latwo dodac brakujace pola po aktualizacji)

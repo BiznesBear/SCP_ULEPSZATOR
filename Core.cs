@@ -5,6 +5,7 @@ using MelonLoader;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl.Thirdperson.Subcontrollers;
 using Respawning;
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using UnityEngine;
@@ -34,13 +35,22 @@ public class Core : MelonMod
     };
     
     
-    private const int FacilitySceneIndex = 2; 
+    private const int FacilitySceneIndex = 2;
 
-
+    public override void OnEarlyInitializeMelon()
+    {
+        base.OnEarlyInitializeMelon();
+    }
     public override void OnInitializeMelon()
     {
         Instance = this;
-        LogAll($"Initialized SCP ULEPSZATOR at {MelonAssembly.Location}.");
+
+        var args = Process.GetCurrentProcess().StartInfo.Arguments;
+        var argsList = Process.GetCurrentProcess().StartInfo.ArgumentList;
+
+        LogAll($"Initialized SCP ULEPSZATOR at {MelonAssembly.Location} with arguments: {args}.");
+
+
 
         ConfigPath = Path.GetDirectoryName(MelonAssembly.Location) + "\\ulepszator-Config.json";
         LogAll($"Config location is set to: {ConfigPath}.");
@@ -51,6 +61,8 @@ public class Core : MelonMod
         // Patch
         HarmonyInstance.PatchAll();
     }
+
+
 
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
